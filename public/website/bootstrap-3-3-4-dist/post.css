@@ -1,0 +1,170 @@
+﻿@font-face {
+    font-family: 'Janna LT';
+    src: url('../common/a-jannat-lt-bold.ttf') format('ttf');
+    src: url('../common/a-jannat-lt-bold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: "Janna LT" !important;
+    font-weight: normal;
+}
+
+
+.post-head{
+    font-size:24px;
+}
+    .post-head span {
+        color: #cc0757;
+        margin-right: 15px;
+    }
+
+.time-bg .sl {
+    padding: 5px 0px 10px;
+    float: left;
+    width: 100%;
+}
+
+#regForm {
+    background-color: #ffffff;
+    padding: 10px;
+    width: 100%;
+    float: left;
+    direction: rtl;
+}
+
+
+input, select {
+	font-family: 'Janna LT' !important;
+    padding: 6px 10px;
+    width: 100%;
+    font-size: 17px;
+    border: 1px solid #aaaaaa;
+    line-height: 25px !important;
+}
+
+    input:hover, input:focus, select:hover, select:focus {
+        outline: 0;
+        border: 1px solid #c8c8c8;
+    }
+
+    /* Mark input boxes that gets an error on validation: */
+    input.invalid {
+        background-color: #ffdddd;
+    }
+select.invalid {
+    background-color: #ffdddd;
+}
+.invalid-feedback{
+    color: #ffdddd;
+}
+
+
+/* Hide all steps by default: */
+.tab {
+    display: none;
+}
+
+.align{
+    float:left;
+    width:100%;
+}
+
+.pos {
+    text-align: center;
+    margin: 10px 0px;
+    float: left;
+    width: 100%;
+}
+  
+button {
+	font-family: 'Janna LT' !important;
+    background-color: #98c64c;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 17px;
+    /*font-family: Raleway;*/
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+    button:hover {
+        opacity: 0.8;
+    }
+
+#prevBtn {
+    background-color: #bbbbbb;
+}
+
+#nextBtn {
+    float: left;
+    color: #ffffff;
+    background: #176083;
+}
+
+#submitBtn{
+    float:left;
+}
+/* Make circles that indicate the steps of the form: */
+.step {
+    height: 30px;
+    width: 30px;
+    margin: 0 25px;
+    background-color: #dedede;
+    border: none;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+    .step::after {
+        content: "";
+        width: 56px;
+        height: 10px;
+        margin-top: 10px;
+        position: absolute;
+        margin-right: 14px;
+        background-color: #dedede;
+    }
+
+    .step:last-child::after {
+        background-color: transparent;
+    }
+
+    .step.active {
+        background-color: #176083;
+    }
+
+    /* Mark the steps that are finished and valid: */
+    .step.finish {
+        background-color: #98c64c;
+    }
+        .step.finish:after {
+            content: "";
+            width: 56px;
+            height: 10px;
+            margin-top: 10px;
+            position: absolute;
+            background-color: #98c64c;
+        }
+
+
+.profile-bar2{
+    margin:70px 0px;
+}
+
+
+@media (max-width:600px){
+    .step {
+    margin: 0 4px;
+}
+.step::after {
+    width: 15px;
+}
+.step.finish:after {
+    width: 15px;
+}
+
+
+}

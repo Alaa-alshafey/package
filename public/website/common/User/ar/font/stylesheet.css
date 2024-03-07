@@ -1,0 +1,7 @@
+@font-face {
+    font-family: 'Janna LT';
+    src: url('../../../../common/a-jannat-lt-bold.ttf') format('ttf');
+    src: url('../../../../common/a-jannat-lt-bold.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
