@@ -58,11 +58,24 @@ class CategoryController extends Controller
         $image = $request->file('image');
         $filename = 'image_' . time();
         $filePath = 'photos/' . $filename . '.webp';
-        
+
         // Save the original image to the storage
         Storage::disk('public')->put($filePath, File::get($image));
-        
+
         $inputs['image'] = 'photos/'.$filename . '.webp';
+
+        if ($request->hasFile('image_price')) {
+            $image_price = $request->file('image_price');
+            $originalFilename = $image_price->getClientOriginalName(); // Get original filename with extension
+            $filename = pathinfo($originalFilename, PATHINFO_FILENAME); // Extract filename without extension
+            $extension = $image_price->getClientOriginalExtension(); // Get the original extension
+            $filenameToStore = 'image_' . time() . '.' . $extension; // Generate unique filename
+
+            // Save the original image to the storage
+            Storage::disk('public')->putFileAs('photos', $image_price, $filenameToStore);
+
+            $inputs['image_price'] = 'photos/' . $filenameToStore;
+        }
 
 
         Category::create($inputs);
@@ -110,13 +123,26 @@ class CategoryController extends Controller
             $image = $request->file('image');
             $filename = 'image_' . time();
             $filePath = 'photos/' . $filename . '.webp';
-            
+
             // Save the original image to the storage
             Storage::disk('public')->put($filePath, File::get($image));
-    
+
             $inputs['image'] = 'photos/' . $filename . '.webp';
 
 
+        }
+
+        if ($request->hasFile('image_price')) {
+            $image_price = $request->file('image_price');
+            $originalFilename = $image_price->getClientOriginalName(); // Get original filename with extension
+            $filename = pathinfo($originalFilename, PATHINFO_FILENAME); // Extract filename without extension
+            $extension = $image_price->getClientOriginalExtension(); // Get the original extension
+            $filenameToStore = 'image_' . time() . '.' . $extension; // Generate unique filename
+
+            // Save the original image to the storage
+            Storage::disk('public')->putFileAs('photos', $image_price, $filenameToStore);
+
+            $inputs['image_price'] = 'photos/' . $filenameToStore;
         }
         $category->update($inputs);
          return redirect()->back()->with('success', 'تم تعديل القسم بنجاح !');

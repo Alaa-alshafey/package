@@ -16,10 +16,10 @@ class UserResource extends JsonResource
     public function toArray($request)
     {
 
-
+//        dd($this->isOnline());
         if ($this->role == "provider") {
             return [
-                'isOnline'=>$this->isOnline(),
+                'isOnline'=>$this->is_online ? true : false,
                 'id' => $this->id,
                 'name' => $this->name,
                 'identity' => $this->identity,

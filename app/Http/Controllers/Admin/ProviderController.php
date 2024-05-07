@@ -84,11 +84,11 @@ class ProviderController extends Controller
             $filename = 'image_'.time();
 
             $filePath = 'photos/' . $filename . '.webp';
-        
+
             // Save the original image to the storage
             Storage::disk('public')->put($filePath, File::get($image));
-            
-    
+
+
             $inputs['image'] = 'photos/'.$filename . '.webp';
 
         }
@@ -168,13 +168,13 @@ class ProviderController extends Controller
                 $filename = 'image_'.time();
 
                 $filePath = 'photos/' . $filename . '.webp';
-        
+
                 // Save the original image to the storage
                 Storage::disk('public')->put($filePath, File::get($image));
-                
-        
+
+
                 $picture = 'photos/'.$filename . '.webp';
-    
+
                 $user->update(['image' => $picture]);
             }
         }
@@ -227,22 +227,22 @@ class ProviderController extends Controller
     {
         $user = User::find($id);
         $user->update(['is_active' => '0']);
-        return back();
+        return redirect()->back()->with('success', 'تم اضافة المزود الى قائمة الحظر بنجاع' );
     }
 
     public function top($id)
     {
         $user = User::find($id);
         $user->update(['is_top' => '1']);
-        
-        return redirect()->back()->with('success', 'تم اضافة مزود الخدمة في اعلي القائمة ' ); 
+
+        return redirect()->back()->with('success', 'تم اضافة مزود الخدمة في اعلي القائمة ' );
     }
 
     public function notTop($id)
     {
         $user = User::find($id);
         $user->update(['is_top' => '0']);
-            return redirect()->back()->with('success', 'تم ازالة مزود الخدمة في اعلي القائمة ' ); 
+            return redirect()->back()->with('success', 'تم ازالة مزود الخدمة في اعلي القائمة ' );
     }
 
     public function view($id)
@@ -257,10 +257,10 @@ class ProviderController extends Controller
         if($sub_category){
             $sub_category->delete();
 
-            return redirect()->back()->with('success', 'تم مسح المجال ' ); 
+            return redirect()->back()->with('success', 'تم مسح المجال ' );
         }else{
 
-            return redirect()->back()->with('warning', 'من فضلك اختار مجال صحيح' ); 
+            return redirect()->back()->with('warning', 'من فضلك اختار مجال صحيح' );
         }
 
     }
@@ -273,10 +273,10 @@ class ProviderController extends Controller
             $ads_category->ads_category = null;
             $ads_category->save();
 
-            return redirect()->back()->with('success', 'تم مسح المجال ' ); 
+            return redirect()->back()->with('success', 'تم مسح المجال ' );
         }else{
 
-            return redirect()->back()->with('warning', 'من فضلك اختار مجال صحيح' ); 
+            return redirect()->back()->with('warning', 'من فضلك اختار مجال صحيح' );
         }
 
     }
@@ -285,7 +285,7 @@ class ProviderController extends Controller
     {
         $user = User::find($id);
         $user->update(['is_active' => '1']);
-        return back();
+        return redirect()->back()->with('success', 'تم ازالة المزود من قائمة الحظر بنجاح' );
     }
 
     public function rates()
@@ -307,9 +307,9 @@ class ProviderController extends Controller
 
             $user->save();
 
-            return redirect()->back()->with('success', 'تم تفعيل الحساب بنجاح ' ); 
+            return redirect()->back()->with('success', 'تم تفعيل الحساب بنجاح ' );
         }else{
-            return redirect()->back()->with('warning', 'لم نتمكن من تفعيل السحاب ' ); 
+            return redirect()->back()->with('warning', 'لم نتمكن من تفعيل السحاب ' );
 
         }
     }
@@ -348,7 +348,7 @@ class ProviderController extends Controller
             }
 
 
-            return redirect()->back()->with('success', 'تم اضافة المجالات للمزود ' ); 
+            return redirect()->back()->with('success', 'تم اضافة المجالات للمزود ' );
 
         }
 
@@ -385,12 +385,12 @@ class ProviderController extends Controller
             }
         }
 
-            return redirect()->back()->with('success', 'تم تحديث المزودين ' ); 
+            return redirect()->back()->with('success', 'تم تحديث المزودين ' );
 
     }
-    
+
  public function delete_selected_subcategories(Request $request){
-     
+
     try {
         foreach ($request->ids as $id) {
             // Assuming you want to delete records based on the IDs
@@ -409,5 +409,5 @@ class ProviderController extends Controller
         // If there's an error during the deletion, return an error message
         return response()->json(['success' => false, 'message' => 'Error deleting subcategories', 'error' => $e->getMessage()]);
     }
- }        
+ }
 }

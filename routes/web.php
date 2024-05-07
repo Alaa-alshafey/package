@@ -53,6 +53,7 @@ Route::get('/contact', '\App\Http\Controllers\FrontController@contact')->name('c
 //Route::get('/sign-in', '\App\Http\Controllers\FrontController@signIn')->name('signIn');
 Route::get('/map', '\App\Http\Controllers\FrontController@map')->name('map');
 Route::get('/terms', '\App\Http\Controllers\FrontController@terms')->name('terms');
+Route::get('/privacy_policy', '\App\Http\Controllers\FrontController@privacy_policy')->name('privacy_policy');
 Route::get('/requests', '\App\Http\Controllers\FrontController@requests')->name('requests');
 Route::get('/offers', '\App\Http\Controllers\FrontController@offers')->name('offers');
 Route::get('/profile/{id}', '\App\Http\Controllers\FrontController@profile')->name('profile');
@@ -268,7 +269,7 @@ Route::group(array('prefix' => 'dashboard','as'=>'admin.', 'middleware' => 'admi
     Route::get('/provider/delete/{id}','App\Http\Controllers\Admin\ProviderController@destroy')->name('provider.destroy');
     Route::get('/provider/top/{id}','App\Http\Controllers\Admin\ProviderController@top')->name('provider.top');
     Route::get('/provider/remove_top/{id}','App\Http\Controllers\Admin\ProviderController@notTop')->name('provider.removeT');
-    Route::get('/active_provider/{id}','Admin\App\Http\Controllers\ProviderController@active')->name('provider.active');
+    Route::get('/active_provider/{id}','App\Http\Controllers\Admin\ProviderController@active')->name('provider.active');
     Route::get('/view_provider/{id}','App\Http\Controllers\Admin\ProviderController@view')->name('provider.view');
     Route::get('/delete_selected_subcategories/','App\Http\Controllers\Admin\ProviderController@delete_selected_subcategories')->name('delete_selected_subcategories');
 
@@ -281,6 +282,7 @@ Route::group(array('prefix' => 'dashboard','as'=>'admin.', 'middleware' => 'admi
     Route::resource('/notifications','App\Http\Controllers\Admin\NotificationsController');
 
     Route::resource('/sends','App\Http\Controllers\Admin\SendsController');
+    Route::resource('/mails','App\Http\Controllers\Admin\MailController');
 
     Route::get('providers/report','App\Http\Controllers\Admin\providersReportController@index')->name('providers.report.index');
     Route::post('providers/report','App\Http\Controllers\Admin\providersReportController@filter')

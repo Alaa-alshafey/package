@@ -29,6 +29,17 @@
     {!! Form::radio("status", 0) !!} عدم العرض
 </div>
 
+@if (isset($category->image_price))
+    <div class="form-group col-md-12 pull-left">
+        <label>صورة قائمة الاسعار الحالية:</label>
+        <img class="img-preview" src="{{ getimg($category->image_price) }}">
+    </div>
+@endif
+
+<div class="form-group col-md-12 pull-left">
+    <label>صورة بقائمة الاسعار</label>
+    {!! Form::file("image_price", null, ['class' => 'form-control']) !!}
+</div>
 @if (isset($category->image))
     <div class="form-group col-md-12 pull-left">
         <label>صورة القسم الرئيسى الحالية:</label>
@@ -40,6 +51,8 @@
     <label>صورة القسم الرئيسى</label>
     {!! Form::file("image", null, ['class' => 'form-control']) !!}
 </div>
+
+
 
 <br>
 <br>

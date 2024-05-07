@@ -7,6 +7,7 @@ use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
 use PHPMailer\PHPMailer\PHPMailer;
 use Illuminate\Support\Facades\Queue;
 use App\Jobs\SendMessage;
@@ -95,7 +96,7 @@ class SendsController extends Controller
 //                 $MsgID = rand(1,99999);
 //                 $result =sendSMS($message, $user->phone,$MsgID);
 
-                    
+
 //                 };
 
 
@@ -103,7 +104,7 @@ class SendsController extends Controller
 
 //         }
 
-//             return redirect()->back()->with('success', 'تم ارسال الرسالة النصية بنجاح' ); 
+//             return redirect()->back()->with('success', 'تم ارسال الرسالة النصية بنجاح' );
 // //        dd('done');
 //     }
 
@@ -111,36 +112,36 @@ public function store(Request $request)
 {
     $this->validate($request,[
         'send_target'   => 'required',
-        'send_type'     => 'required|in:sms,email,all',
+        'send_type'     => 'required|in:sms,email,all,whatsapp',
         'send_body'     => 'required',
     ]);
-   
-   
-   
+
+
+
     $sendTarget = $request['send_target'];
     $sendType = $request['send_type'];
     $message = $request['send_body'];
 
 if($sendTarget == "providerTypes"){
         if(!empty($request['type'])){
-            
+
             $sub_categories = SubCategory::where('category_id', $request['type'])->get();
-            
-            
+
+
             $userIds = collect(); // Initialize an empty collection for user_ids
-            
+
             foreach ($sub_categories as $sub_category) {
                 // Retrieve user_ids for each sub-category and merge them into the $userIds collection
                 $userIds = $userIds->merge($sub_category->UsersIds());
             }
-            
+
                 $users = User::whereIn('id',$userIds)->get();
 
         }else{
-            
+
                         return redirect()->back()->with('error', 'يجب ان تختار نوع القسم');
 
-        }    
+        }
 }elseif($sendTarget == "providerAds"){
         if(!empty($request['type'])){
         $users = User::query();
@@ -154,14 +155,14 @@ if($sendTarget == "providerTypes"){
             }
         });
         $users = $users->get();
-        }else{  
-                
-            
+        }else{
+
+
                         return redirect()->back()->with('error', 'يجب ان تختار نوع الاعلان');
 
         }
 
-        
+
 
 }else{
     $usersQuery = User::where('is_admin', '!=', '1');
@@ -173,7 +174,7 @@ if($sendTarget == "providerTypes"){
         case 'provider':
             $usersQuery->where('role', 'provider');
             break;
-            
+
         case 'all_users':
             // No need to add any extra condition
             break;
@@ -184,7 +185,7 @@ if($sendTarget == "providerTypes"){
 
     $users = $usersQuery->get();
 
-    
+
 }
 
     foreach ($users as $user) {
@@ -193,26 +194,49 @@ if($sendTarget == "providerTypes"){
             SendMessage::dispatch($user->phone, $message)->onQueue('sms');
         }
 
-        if ($sendType == 'email' || $sendType == 'all') {
-            // Dispatch SendEmailJob to send Email
-            SendMessage::dispatch($user->phone, $message)->onQueue('sms');
+        if ($sendType == 'whatsapp' ) {
+            // Dispatch SendMessage to send SMS
+            if($request->hasFile('image')){
+                $imgUrl = uploader($request,'image');
+                $fileUrl = "https://package.sa/storage/". $imgUrl ;
+                sendFileHiWhats($user->phone, $message, $fileUrl);
+            }else{
+
+                sendMessageHiWhats($user->phone,$message);
+
+            }
+
+
         }
+
+        if ($sendType == 'email' || $sendType == 'all') {
+                    
+                Mail::send('emails.sendImage', ['message' => $message], function($message) use ($user) {
+                    $message->to($user->email, 'اهلا بك فى تطبيق بكج')
+                        ->subject('اهلا بك فى تطبيق بكج')
+                        ->from('info@package.sa', 'Package');
+                });
+
+
+
+        }
+
     }
 
-          return redirect()->back()->with('success', 'تم ارسال الرسالة النصية بنجاح' ); 
+          return redirect()->back()->with('success', 'تم ارسال الرسالة النصية بنجاح' );
 }
 
     public function selectcategoryTypes(Request $request){
-        
+
         if(isset($_GET['providerTypes'])){
         $categories = \App\Models\Category::select('id','ar_name')->where('status',1)->get();
 
         }else{
-            
+
         $categories = \App\Models\AdsCategory::select('id','ar_name')->get();
 
         }
     return response()->json($categories);
     }
-    
+
 }

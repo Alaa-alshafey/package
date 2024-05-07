@@ -117,10 +117,10 @@ class ClientController extends Controller
         $filename = 'image_'.time();
 
         $filePath = 'photos/' . $filename . '.webp';
-        
+
         // Save the original image to the storage
         Storage::disk('public')->put($filePath, File::get($image));
-        
+
         $inputs['image'] = 'photos/'.$filename . '.webp';
 
         //$inputs['image'] = $image;
@@ -168,18 +168,18 @@ class ClientController extends Controller
 
         $inputs = $request->all();
         if ($request->image != null) {
-            dd($request->image);
+           
             if ($request->hasFile('image')) {
                 //$inputs = $request->all();
                 $image = $request->file('image');
                 $filename = 'image_'.time();
                 $filePath = 'photos/' . $filename . '.webp';
-        
+
                 // Save the original image to the storage
                 Storage::disk('public')->put($filePath, File::get($image));
-                
+
                 $picture = 'photos/'.$filename . '.webp';
-        
+
                 $user->update(['image' => $picture]);
             }
         }
@@ -187,7 +187,7 @@ class ClientController extends Controller
             $user->update(['password' => Hash::make($request->password)]);
         }
         $user->update(Arr::except($inputs, ['password', 'image']));
-         
+
          return redirect()->back()->with('error', ' تم تعديل العميل بنجاح !');
     }
 

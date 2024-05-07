@@ -795,7 +795,7 @@ border-radius: 19px !important;
                             <div class="media-body">
                                 @foreach($provider->comment() as $comment)
                                     <?php
-                                    $user = \App\User::find($comment->user_id);
+                                    $user = \App\Models\User::find($comment->user_id);
                                     ?>
                                     <div class="alert alert-info" role="alert">
                                         <p class="alert-link">اسم المستفيد:  {{ $user->name }}</p>

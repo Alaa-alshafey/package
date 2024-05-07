@@ -43,7 +43,7 @@ class ProviderResource extends ResourceCollection
                     'bio'=>$result,
                     'rate'=>$q->rate(),
                     'job'=>$q->job,
-                    'isOnline'=>$q->isOnline(),
+                    'isOnline'=>$q->is_online ? true : false,
                     'image'=>getimg($q->image),
                     'experience_years'=>$q->experience_years,
                     'nationality'=>$q->nationality,
@@ -67,6 +67,7 @@ class ProviderResource extends ResourceCollection
                     'sub_categories' => $q->SubCategories,
                     'providerCount' => count($q->providerCount),
                     'orderCount'    => $q->orders()->count(),
+                    'is_top' => $q->is_top,
                     'is_active' => $q->is_active,
                 ];
             }),

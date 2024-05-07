@@ -135,11 +135,11 @@ class FrontController extends Controller
      */
     public function index()
     {
-        //return it is under constriction
+	 //return it is under constriction
         //return view('under_constriction');
         $categories=Category::orderBy('view_number','asc')->get();
 
-        
+
         return view('site.home',['categories'=>$categories]);
     }
 
@@ -288,6 +288,14 @@ class FrontController extends Controller
     {
         return view('site.terms');
     }
+
+    public function privacy_policy()
+    {
+        return view('site.terms');
+//        return view('site.privacy');
+
+    }
+
 
     public function map()
     {

@@ -20,7 +20,9 @@ class CategoryResource extends JsonResource
             'name_ar'=>$this->ar_name,
             'name_en'=>$this->en_name,
             'image'=>getimg($this->image),
-            'sub_categories'=>$this->subCategories
+            'sub_categories'=>$this->subCategories,
+            'image_price'=>$this->image_price,
+            'status'=>$this->status
         ];
     }
 }

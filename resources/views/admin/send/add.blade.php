@@ -66,5 +66,18 @@
         }
     })
 </script>
-    
+    <script>
+        $(document).ready(function() {
+            $('.send_type').on('change',function() {
+
+              
+                if ($(this).val() === 'whatsapp') {
+                    $('.image_upload').show();
+                } else {
+                    $('.image_upload').hide();
+                }
+            });
+        });
+    </script>
+
 @endsection

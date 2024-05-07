@@ -24,14 +24,18 @@
     <label>اختر القسم</label>
     <Select class="form-control" name="type">
         <option></option>
-        
+
     </Select>
 </div>
 
 <div class="form-group col-md-12 pull-left">
     <label>اختر  نوع الارسال</label>
     {!! Form::select("send_type",sendType(),
-    null,['class'=>'form-control ','placeholder'=>'اختر  نوع الارسال  '])!!}
+    null,['class'=>'form-control send_type','placeholder'=>'اختر  نوع الارسال  '])!!}
+</div>
+<div class="form-group col-md-12 pull-left image_upload" style="display:none">
+    <label>الصورة</label>
+    <input type="file" name="image" class="form-control">
 </div>
 
 

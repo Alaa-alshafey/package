@@ -47,8 +47,21 @@ class HomeController extends Controller
     public function GetAllCategory()
     {
 
-        $categories = Category::where('status',1)->orderBy('view_number','asc')->get();
+
+        $categories = Category::orderBy('view_number','asc')->get();
+
+        $categories->each(function($category){
+
+            if($category->image_price){
+                $category->image_price = getimg($category->image_price);
+            }else{
+                $category->image_price = $category->image_price;
+            }
+
+        });
         $countries = CategoryResource::collection($categories);
+
+
         return $this->apiResponse($countries);
 
         if (request()->getHttpHost() != "dev.sheari.net"){
@@ -56,6 +69,7 @@ class HomeController extends Controller
 
             $categories = Category::all();
             $countries = CategoryResource::collection($categories);
+
             return $this->apiResponse($countries);
 
         }
@@ -213,10 +227,10 @@ class HomeController extends Controller
 public function GetProviderBySubCategory($id)
 {
     $sub_category = SubCategory::findOrFail($id);
-    
+
     // Execute the query and retrieve a collection
     $providers = $sub_category->PUsers()->paginate();
-    
+
     // Transform the collection
     $transformedProviders = $providers->transform(function ($q) {
         // Decode HTML entities
@@ -593,12 +607,13 @@ public function GetProviderBySubCategory($id)
     }
 
     $query = User::query();
-    $query->where('role', '=', 'provider');
+    $query->where('role', '=', 'provider')->where('is_active' , '1');
 
     $query->when(isset($request['sub_category_id']), function ($q) use ($request) {
         if ($request['sub_category_id'] != '') {
             $users = SubCategory::findOrFail($request['sub_category_id'])->UsersIds();
-            return $q->whereIn('id', $users);
+            $result = $q->whereIn('id', $users)->groupBy('id');
+            return $result;
         }
     });
 
@@ -636,12 +651,54 @@ public function GetProviderBySubCategory($id)
         }
     });
 
-    $providers = $query->orderBy('is_top', 'DESC')->paginate(15);
+    $providers = $query->orderBy('is_top', 'DESC')->orderBy('id', 'Desc')->distinct()->paginate(15);
 
     return $this->apiResponse(new ProviderResource($providers));
 }
 
-
+//    public function search(Request $request)
+//    {
+//        $rules = [
+//            'sub_category_id' => 'nullable|exists:sub_categories,id',
+//            'country_id' => 'nullable|exists:countries,id',
+//            'city_id' => 'nullable|exists:cities,id',
+//            'keyword' => 'nullable|string|max:255', // Add this line for the keyword filter
+//        ];
+//
+//        $validation = $this->apiValidation($request, $rules);
+//        if ($validation instanceof Response) {
+//            return $validation;
+//        }
+//
+//        $query = User::query()->where('role', 'provider');
+//
+//        if ($request->filled('sub_category_id')) {
+//            $subCategory = SubCategory::findOrFail($request->sub_category_id);
+//            $query->whereHas('subCategories', function ($subQuery) use ($subCategory) {
+//                $subQuery->where('sub_categories.id', $subCategory->id)->where('is_verified', 1);
+//            });
+//        }
+//
+//        if ($request->filled('city_id')) {
+//            $city = City::findOrFail($request->city_id);
+//            $query->where('users.city_id', $city->id);
+//        }
+//
+//        if ($request->filled('country_id')) {
+//            $country = Country::findOrFail($request->country_id);
+//            if (!$request->filled('city_id')) {
+//                $query->whereIn('users.city_id', $country->cities()->pluck('id'));
+//            }
+//        }
+//
+//        if ($request->filled('keyword')) {
+//            $query->where('users.name', 'like', '%' . $request->keyword . '%');
+//        }
+//
+//        $providers = $query->with(['subCategories', 'city.country'])->orderByDesc('is_top')->paginate(15);
+//
+//        return $this->apiResponse(new ProviderResource($providers));
+//    }
 
     public  function  contact (Request $request){
         $rules = [
@@ -908,7 +965,7 @@ public function GetProviderBySubCategory($id)
         }
 
         $user=User::where('phone',$phone)->first();
-        
+
         if($user){
             return \response()->json([
                 'status'    => false,

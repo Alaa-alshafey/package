@@ -93,6 +93,9 @@ Route::group(['middleware'=>'localization'],function () {
                 Route::post('profile', 'App\Http\Controllers\Api\AuthController@UpdateProfile');
                 Route::post('location', 'App\Http\Controllers\Api\AuthController@UpdateLocation');
             });
+            Route::any('getprofile','App\Http\Controllers\Api\AuthController@getUserprofile');
+            Route::any('UpdateUserStatus','App\Http\Controllers\Api\AuthController@UpdateUserStatus');
+
         });
 
          Route::group(['prefix' => 'provider'], function () {
@@ -140,7 +143,8 @@ Route::group(['middleware'=>'localization'],function () {
                 //actions
                 Route::post('send', 'App\Http\Controllers\Api\OrderController@SendOrder');
                 Route::post('cancel', 'App\Http\Controllers\Api\OrderController@cancelOrder');
-                Route::post('rate', 'App\Http\Controllers\Api\OrderController@rateOrder');
+                 Route::post('rate', 'App\Http\Controllers\Api\OrderController@rateOrder');
+                 Route::post('getrates', 'App\Http\Controllers\Api\OrderController@getrates');
             });
          });
 
@@ -154,6 +158,7 @@ Route::group(['middleware'=>'localization'],function () {
 
     });
 
+    Route::post('client/ordered/getrates', 'App\Http\Controllers\Api\OrderController@getrates');
 
     Route::post('search','App\Http\Controllers\Api\HomeController@search');
     Route::get('ads','App\Http\Controllers\Api\HomeController@GetRandomAds');

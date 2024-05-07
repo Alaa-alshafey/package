@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use JWTFactory;
+use Illuminate\Support\Facades\Auth;
+
 use JWTAuth;
 use PHPMailer\PHPMailer\PHPMailer;
 use Validator;
@@ -24,6 +26,7 @@ use Illuminate\Http\Response;
 use \Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
@@ -209,12 +212,15 @@ class AuthController extends Controller
         }
 
         $user = User::where('phone',$request->phone)->first();
+        $user->user_token = $token;
+        $user->is_online = 1;
+        $user->save();
 
         if(!$user){
             $user = User::where('phone',$request->phone)->first();
         }
 
-        
+
 
 
 //        if ($user->is_verified==0){
@@ -272,13 +278,13 @@ class AuthController extends Controller
 
 
         if($user){
-            
+
             $user->fcm_token_android = $request->fcm_token_android;
-            
+
             $user->fcm_token_ios = $request->fcm_token_ios;
-            
+
             $user->device_token = $request->fcm_token_android;
-            
+
             $user->save();
 
 
@@ -606,6 +612,7 @@ class AuthController extends Controller
         auth()->user()->update([
             'fcm_token_android'=>null,
             'fcm_token_ios'=>null,
+            'is_online'=>0,
         ]);
 
         return $this->apiResponse(__('تم تسجيل الخروج بنجاح بنجاح'));
@@ -669,10 +676,10 @@ class AuthController extends Controller
                     $image = $request->file('image');
                     $filename = 'image_' . time();
                     $filePath = 'photos/' . $filename . '.webp';
-                    
+
                     // Save the original image to the storage
                     Storage::disk('public')->put($filePath, File::get($image));
-                    
+
                     $user->image  = 'photos/'.$filename . '.webp';
 
                 }
@@ -897,6 +904,91 @@ class AuthController extends Controller
         }
     }
 
+
+
+
+    public function getUserprofile()
+    {
+        // Check if the current request is authenticated
+        if (Auth::check()) {
+            // Get the authenticated user
+            $user = Auth::user();
+
+            // Get the stored token from the user's session or database
+            $storedToken = $user->user_token; // Assuming you store the token in the session
+
+            // Get the bearer token from the request headers
+            $bearerToken = request()->bearerToken();
+
+            // Check if both tokens exist
+            if ($storedToken && $bearerToken) {
+                // Check if the bearer token matches the stored token
+                if ($bearerToken === $storedToken) {
+
+                        $provider =  new UserResource($user);
+
+                        return $this->createdResponse([$provider]);
+
+
+
+                } else {
+                    // Tokens don't match, return Unauthorized response
+                    return response()->json(['error' => 'Unauthorized'], 401);
+                }
+            } else {
+                // Tokens are missing, return Unauthorized response
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        } else {
+            // Not authenticated, return Unauthorized response
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+    }
+
+    public function UpdateUserStatus(Request $request)
+    {
+        // Check if the current request is authenticated
+        if (Auth::check()) {
+            // Get the authenticated user
+            $user = Auth::user();
+
+            // Get the stored token from the user's session or database
+            $storedToken = $user->user_token; // Assuming you store the token in the session
+
+            // Get the bearer token from the request headers
+            $bearerToken = request()->bearerToken();
+
+            // Check if both tokens exist
+            if ($storedToken && $bearerToken) {
+                // Check if the bearer token matches the stored token
+                if ($bearerToken === $storedToken) {
+
+//                        $user = User::find($user->id);
+                        $user->is_online = $request->status;
+                        $user->save();
+                        
+
+                    $user =  new UserResource($user);
+
+                    return $this->createdResponse([$user]);
+
+
+
+                } else {
+                    // Tokens don't match, return Unauthorized response
+                    return response()->json(['error' => 'Unauthorized'], 401);
+                }
+            } else {
+                // Tokens are missing, return Unauthorized response
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        } else {
+            // Not authenticated, return Unauthorized response
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+    }
+
+
     public function GetProvider($id){
         $provider=User::find($id);
 
@@ -956,27 +1048,27 @@ class AuthController extends Controller
                 $user->favourites_user()->delete();
                 }
                 if($user->userNotifications()){
-                    
+
                 $user->userNotifications()->delete();
 
                 }
                 if($user->userOrders()){
-                    
+
                 $user->userOrders()->delete();
 
                 }
                 if($user->providerOrders()){
-                    
+
                 $user->providerOrders()->delete();
 
                 }
-                
+
                 if($user->projects()){
-                    
+
                 $user->projects()->delete();
                 }
                 if($user->providerCount()){
-                    
+
                 $user->providerCount()->delete();
 
                 }

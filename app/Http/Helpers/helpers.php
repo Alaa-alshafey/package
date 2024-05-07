@@ -1,7 +1,8 @@
 <?php
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 function printStringResult($apiResult, $arrayMsgs, $printType = 'Alpha')
 {
@@ -181,18 +182,42 @@ function uploadpath()
  * @param $filename
  * @return string
  */
+
 function getimg($filename)
 {
-    
-    
+
+    // Check if the image URL is cached
+    $cacheKey = 'image_url_' . $filename;
+    if (Cache::has($cacheKey)) {
+        return Cache::get($cacheKey);
+    }
+    // If not cached, generate the image URL
     $base_url = url('/');
-    if($filename){
-            return 'https://sheari.net/storage/'.$filename;
+    $imageUrl = '';
+
+    if ($filename) {
+        // Construct the full image URL
+        $imageUrl = 'https://package.sa/storage/' . $filename;
+
+        // Check server response time
+        $response = Http::head($imageUrl);
+
+        if ($response->successful()) {
+            // Cache the image URL for future use
+            Cache::put($cacheKey, $imageUrl, now()->addHours(24)); // Adjust the cache expiry time as needed
+        } else {
+            // Use placeholder image URL
+            $imageUrl = $base_url . '/profile-placeholder.png';
+        }
+    } else {
+        // If no filename is provided, use a placeholder image
+        $imageUrl = $base_url . '/profile-placeholder.png';
     }
-    else{
-        return  $base_url.'/profile-placeholder.png';
-    }
+
+    return $imageUrl;
 }
+
+
 function updateImageToWebP($filename)
 {
     // Construct the full local file path for the image using storage_path()
@@ -207,8 +232,8 @@ function updateImageToWebP($filename)
         // Load the image using Intervention Image
         $image = Image::make($imagePath);
 
-        // Convert the image to webp format
         $image->encode('webp');
+
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
         // Save the image with the new extension in the public storage directory
@@ -219,15 +244,15 @@ function updateImageToWebP($filename)
         // Save the image with the new extension in the storage/app/public/ directory
         $storageImagePath = storage_path('app/public/' . $newFilename);
         $image->save($storageImagePath);
-        
+
         // Return the updated filename
-        return 'https://sheari.net/storage/'.$newFilename;
+        return 'https://package.sa/storage/'.$newFilename;
     } else {
         // Return the original filename if the image file doesn't exist
-         return 'https://sheari.net/storage/'.$filename;
+         return 'https://package.sa/storage/'.$filename;
     }
     }else{
-        
+
                 return  $base_url.'/profile-placeholder.png';
 
     }
@@ -277,7 +302,7 @@ function uploadImageWithCompress($request,$image,$width,$height){
     $filename = 'image_'.time();
     $filePath = 'photos/' . $filename . '.webp';
 
-                
+
 
 
     //$img_resize->save(storage_path('photos').'/' . $file);
@@ -488,7 +513,7 @@ function notificationTarget(){
         'client'=>'عميل',
         'provider'   =>  'مزود خدمة',
         'all_users'=>'كل المستخدمين',
-        
+
     ];
     return $target;
 }
@@ -510,10 +535,87 @@ function sendTarget(){
 function sendType(){
     $target = [
         'sms'=>'رسالة نصية',
+        'whatsapp'=>'واتساب',
         'email'   =>  'بريد الكتروني',
         'all'=>'رسالة نصية وبريد الكتروني',
     ];
     return $target;
+}
+function sendMessageHiWhats($numbers, $message)
+{
+    $url = 'https://hiwhats.com/API/send';
+    $mobile = '966506601144';
+    $password = '152d38465';
+    $instanceid = '20133';
+    $json = '1';
+    $type = '1';
+    $data = [
+        'mobile' => $mobile,
+        'password' => $password,
+        'instanceid' => $instanceid,
+        'message' => $message,
+        'numbers' => $numbers,
+        'json' => $json,
+        'type' => $type,
+    ];
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+
+    $response = curl_exec($ch);
+
+
+    // Check for cURL errors or handle the response as needed
+    if (curl_errno($ch)) {
+        // Handle cURL error
+        echo 'cURL Error: ' . curl_error($ch);
+    } else {
+        // Process the response
+
+        echo 'Response: ' . $response;
+    }
+
+    curl_close($ch);
+}
+
+
+function sendFileHiWhats($numbers, $message, $fileUrl)
+{
+    $url = 'https://hiwhats.com/API/send';
+    $mobile = '966506601144';
+    $password = '152d38465';
+    $instanceid = '20133';
+    $json = '1';
+    $type = '2'; // Set type to 2 for sending files
+    $data = [
+        'mobile' => $mobile,
+        'password' => $password,
+        'instanceid' => $instanceid,
+        'message' => $message,
+        'numbers' => $numbers,
+        'json' => $json,
+        'type' => $type,
+        'fileurl' => $fileUrl, // Include the file URL in the request
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+
+    $response = curl_exec($ch);
+
+    // Check for cURL errors or handle the response as needed
+    if (curl_errno($ch)) {
+        // Handle cURL error
+        echo 'cURL Error: ' . curl_error($ch);
+    } else {
+        // Process the response
+        echo 'Response: ' . $response;
+    }
+
+    curl_close($ch);
 }
 
 

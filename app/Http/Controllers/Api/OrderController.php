@@ -123,21 +123,20 @@ class OrderController extends Controller
         $validation=$this->apiValidation($request,$rules);
         if($validation instanceof Response){return $validation;}
             $inputs=$request->all();
-            if($request->hasFile('file')){
-                $image = $request->file('file');
-                $filename = 'image_' . time();
-                $filePath = 'photos/' . $filename . '.webp';
-                
-                // Save the original image to the storage
-                Storage::disk('public')->put($filePath, File::get($image));
-                
-                $inputs['image'] = 'photos/'. $filename . '.webp';
+        if ($request->hasFile('file')) {
+            $image = $request->file('file');
+            $originalFilename = $image->getClientOriginalName(); // Get original filename
+            $extension = $image->getClientOriginalExtension(); // Get original extension
+            $filename = 'image_' . time();
 
-                //$image = uploadBanner($request,'file');
+            // Save the original image to the storage with its original extension
+            $filePath = 'photos/' . $filename . '.' . $extension;
+            Storage::disk('public')->put($filePath, File::get($image));
 
-                $inputs['file']='photos/'.$filename . '.webp';
-
-            }
+            // Save the file path to your database or use it as needed
+            $inputs['image'] = $filePath;
+            $inputs['file'] = $filePath;
+        }
 
             $inputs['user_id']=auth()->id();
 
@@ -183,10 +182,10 @@ class OrderController extends Controller
             $filename = 'file_'.time();
             $filename = 'image_' . time();
             $filePath = 'photos/' . $filename . '.webp';
-            
+
             // Save the original image to the storage
             Storage::disk('public')->put($filePath, File::get($image));
-            
+
             $inputs['image'] = 'photos/'.$filename . '.webp';
 
             //$image = uploadBanner($request,'file');
@@ -239,48 +238,61 @@ class OrderController extends Controller
         return $this->createdResponse($projects);
     }
 
-    // public function GetProjectsForProvider($id){
-
-    //     $projects=ProviderProject::where('user_id',$id)->get();
+    public function GetProjectsForProvider($id){
 
 
-    //     foreach ($projects as $project){
+         $projects=ProviderProject::where('user_id',$id)->get();
 
-    //         if($project->file){
-    //             $project->file=getimg($project->file);
-    //         }else{$project->file = "https://sheari.net/22.jpg";}
+         foreach ($projects as $project){
 
-    //     }
+             if($project->file){
 
-    //     return $this->createdResponse($projects);
-    // }
+                 $project->file=getimg($project->file);
+             }else{$project->file = "https://sheari.net/22.jpg";}
 
-        public function GetProjectsForProvider($id)
-        {
-            $projects = ProviderProject::where('user_id', $id)->get();
+         }
 
-            
-            foreach ($projects as $project) {
-                if ($project->file) {
-                    // Check if the file extension is not 'webp'
-                    $extension = pathinfo($project->file, PATHINFO_EXTENSION);
-                   
-                    if (strtolower($extension) !== 'webp') {
-                      
-                        // Update the image extension to 'webp' and save it
-                        $project->file = updateImageToWebP($project->file);
-                    } else {
-                        // If the image is already in 'webp' format, no need to update
-                        $project->file = getimg($project->file);
-                    }
-                } else {
-                    // Set a default image URL if no file is provided
-                    $project->file = "https://sheari.net/profile-placeholder.png";
-                }
-            }
-        
-            return $this->createdResponse($projects);
-        }
+         return $this->createdResponse($projects);
+     }
+
+//
+//    public function GetProjectsForProvider($id)
+//        {
+//            $projects = ProviderProject::where('user_id', $id)->get();
+//
+//
+//            foreach ($projects as $project) {
+//
+//                if($project->file_webb){
+//
+//                    $project->file = $project->file_webb;
+//
+//                }else{
+//                    if ($project->file) {
+//                        // Check if the file extension is not 'webp'
+//                        $extension = pathinfo($project->file, PATHINFO_EXTENSION);
+//
+//                        if (strtolower($extension) !== 'webp') {
+//
+//                            // Update the image extension to 'webp' and save it
+//                            $project->file = updateImageToWebP($project->file);
+//                            $project_data = ProviderProject::find($project->id);
+//
+//                            $project_data->file_webb = $project->file;
+//                            $project_data->save();
+//                        } else {
+//                            // If the image is already in 'webp' format, no need to update
+//                            $project->file = getimg($project->file);
+//                        }
+//                    } else {
+//                        // Set a default image URL if no file is provided
+//                        $project->file = "https://package.sa/profile-placeholder.png";
+//                    }
+//                }
+//            }
+//
+//            return $this->createdResponse($projects);
+//        }
 
 
 
@@ -297,6 +309,7 @@ class OrderController extends Controller
 
     public function SendOrder(Request $request){
         ///$request['time']=$request->date.' '.$request->time;
+
 
         $rules = [
             'title' =>'required|string|max:191',
@@ -380,10 +393,10 @@ class OrderController extends Controller
 
             $filename = 'image_' . time();
             $filePath = 'photos/' . $filename . '.webp';
-            
+
             // Save the original image to the storage
             Storage::disk('public')->put($filePath, File::get($image));
-    
+
             $inputs['attachment'] = 'photos/' . $filename . '.webp';
 
             }
@@ -460,35 +473,35 @@ class OrderController extends Controller
                 Mail::send('emails.order', $data, function($message) use ($provider) {
                     $message->to($provider->email, 'نشعركم بوصول طلب جديد في منصة بكج')->subject
                     ('نشعركم بوصول طلب جديد في منصة بكج');
-                    $message->from('info@sheari.net','Package');
+                    $message->from('info@package.sa','Package');
                 });
 
 
                 Mail::send('emails.order2', $data, function ($message) use ($user) {
                     $message->to($user->email, ' أرسال طلب جديد')->subject
                     (' أرسال طلب جديد');
-                    $message->from('info@sheari.net', 'Package');
+                    $message->from('info@package.sa', 'Package');
                 });
                 $data = array('order'=>$order);
 
                 //dd($data['order']->user);
 
                 Mail::send('emails.sheari_order', $data, function($message) {
-                    $message->to('sheari@hotmail.com', 'تفاصيل طلب جديد في بكج')->subject
+                    $message->to('alaa.alshafey12345@gmail.com', 'تفاصيل طلب جديد في بكج')->subject
                     ('تفاصيل طلب جديد في بكج');
-                    $message->from('info@sheari.net','Package');
+                    $message->from('info@package.sa','Package');
                 });
 
                 Mail::send('emails.sheari_order', $data, function($message) {
                     $message->to('mom3932m@gmail.com', 'تفاصيل طلب جديد في بكج')->subject
                     ('تفاصيل طلب جديد في بكج');
-                    $message->from('info@sheari.net','Package');
+                    $message->from('info@package.sa','Package');
                 });
 
                 Mail::send('emails.sheari_order', $data, function($message) {
                     $message->to('ayed200727@yahoo.com', 'تفاصيل طلب جديد في بكج')->subject
                     ('تفاصيل طلب جديد في بكج');
-                    $message->from('info@sheari.net','Package');
+                    $message->from('info@package.sa','Package');
                 });
 
             }catch (\Exception $e){
@@ -627,7 +640,7 @@ class OrderController extends Controller
             Mail::send('emails.update_price', $email_data, function($message) use ($user) {
                 $message->to($user->email, 'تم تحديث سعر الطلب')->subject
                 ('نشعركم بتحديث سعر طلبكم من قبل المزود');
-                $message->from('info@sheari.net','Package');
+                $message->from('info@package.sa','Package');
             });
         }catch (\Exception $e){
 
@@ -694,7 +707,7 @@ class OrderController extends Controller
                     Mail::send('emails.canceled_order2', $email_data, function($message) use ($user) {
                         $message->to($user->email, 'تم الغاء الطلب من قبل العميل  ')->subject
                         ('تم الغاء الطلب من قبل العميل ');
-                        $message->from('info@sheari.net','Package');
+                        $message->from('info@package.sa','Package');
                     });
                 }catch (\Exception $e){
 
@@ -735,7 +748,7 @@ class OrderController extends Controller
                     Mail::send('emails.canceled_order', $email_data, function($message) use ($user) {
                         $message->to($user->email, 'تم الغاء الطلب من قبل الموزد الحدمة ')->subject
                         ('تم الغاء الطلب من قبل الموزد الحدمة ');
-                        $message->from('info@sheari.net','Package');
+                        $message->from('info@package.sa','Package');
                     });
                 }catch (\Exception $e){
 
@@ -769,9 +782,9 @@ class OrderController extends Controller
         if($order){
 
             if($order->provider_id==auth()->id()){
-                if(Carbon::createFromFormat('Y-m-d H:i:s',
-                        $order->date.''.$order->time) >=   Carbon::now())
-                    {
+//                if(Carbon::createFromFormat('Y-m-d H:i:s',
+//                        $order->date.''.$order->time) >=   Carbon::now())
+//                    {
                         $user=User::find($order->user_id);
                         $order->status='finished';
                         $order->save();
@@ -801,7 +814,7 @@ class OrderController extends Controller
                             Mail::send('emails.finished_order', $email_data, function($message) use ($user) {
                                 $message->to($user->email, 'تم انهاء الطلب من قبل الموزد الحدمة ')->subject
                                 ('تم انهاء الطلب من قبل الموزد الحدمة ');
-                                $message->from('info@sheari.net','Package');
+                                $message->from('info@package.sa','Package');
                             });
                         }catch (\Exception $e){
 
@@ -811,10 +824,10 @@ class OrderController extends Controller
 
 
                         return $this->createdResponse($data);
-                }
-                else{
-                    return $this->apiResponse(null,__('الوقت لم ينتهى بعد '),401);
-                }
+//                }
+//                else{
+//                    return $this->apiResponse(null,__('الوقت لم ينتهى بعد '),401);
+//                }
             }
             else{
                 return $this->apiResponse(__(' غير مصرح  '));
@@ -830,7 +843,7 @@ class OrderController extends Controller
 
         $rules = [
             'order_id' =>'required|string|max:191',
-            'comment'=>'required|string',
+//            'comment'=>'required|string',
             'rate_no'=>'required|numeric|max:5'
         ];
 
@@ -870,6 +883,47 @@ class OrderController extends Controller
 
     }
 
+    public function getrates(Request $request){
+
+        $rules = [
+            'provider_id' =>'required|string|max:191',
+        ];
+        $validation=$this->apiValidation($request,$rules);
+
+        if($validation instanceof Response){return $validation;}
+
+        $provider=User::where('role','provider')->where('id',($request->provider_id))->first();
+
+        if(empty($provider)){
+
+            return $this->apiResponse(__('حدثت مشكلة'));
+
+        }else{
+            $orders = Order::select('id', 'comment', 'user_id', 'rate')
+                ->where('provider_id', $provider->id)
+                ->where('rate','!=',null)
+                ->get();
+
+            $orders->transform(function ($order) {
+                // Retrieve user information for each order
+                $user = User::find($order->user_id); // Assuming there's a relationship named 'user' in your Order model
+             if($user){
+                 $user->image = getimg($user->image);
+                 // Append user information to the order
+                 $order->user = $user;
+
+             }
+
+                return $order;
+            });
+
+            return $this->createdResponse($orders);
+
+
+        }
+
+
+    }
     public  function AcceptOrder(Request $request){
         $rules = [
             'order_id' =>'required',
@@ -897,16 +951,16 @@ class OrderController extends Controller
                         $order->title, [$user->fcm_token_android],
                         ['type' => 'order', 'data' => $order],
                         false);
-                        
-                        
+
+
                 if ($user->fcm_token_ios)
                     $result = $this->notifyByFirebase(' تم قبول الطلب', $order->title, [$user->fcm_token_ios], ['type' => 'order', 'data' => $order], true);
 
-            
-                // dd(User::find($order->user_id));    
+
+                // dd(User::find($order->user_id));
 
                 if ($user->device_token){
-                    
+
                     sendNotification($user->device_token,'الطلبات',"تم قبول الطلب $order->title");
                 }
 
@@ -920,7 +974,7 @@ class OrderController extends Controller
                     Mail::send('emails.accepted_order', $email_data, function($message) use ($user) {
                         $message->to($user->email, 'تمت الموافقة علي طلبكم من قبل الموزد الحدمة ')->subject
                         ('تمت الموافقة علي طلبكم من قبل الموزد الحدمة ');
-                        $message->from('info@sheari.net','Package');
+                        $message->from('info@package.sa','Package');
                     });
                 }catch (\Exception $e){
 
@@ -941,7 +995,7 @@ class OrderController extends Controller
 
     public function  getNotification(){
         $notfication =  \App\Models\Notification::where('read','no')->where('user_id',auth()->id())->paginate();
-        
+
         return $this->apiResponse(new NotificationResource($notfication));
     }
 

@@ -20,11 +20,11 @@
     <meta name="Classification" content="Business">
     <meta name="author" content="name, sheari@hotmail.com">
     <meta name="designer" content="">
-    <meta name="copyright" content="sheari.net">
+    <meta name="copyright" content="package.sa">
     <meta name="reply-to" content="sheari@hotmail.com">
     <meta name="owner" content="باكيج">
     <meta name="url" content="http://www.sheari.net">
-    <meta name="identifier-URL" content="http://www.sheari.net">
+    <meta name="identifier-URL" content="http://www.packge.sa">
     <meta name="directory" content="submission">
     <meta name="category" content="">
     <meta name="coverage" content="Worldwide">

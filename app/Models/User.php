@@ -50,7 +50,7 @@ class User extends Authenticatable implements JWTSubject
         'fcm_token_ios', 'confirmation_code', 'verification_code', 'is_verified', 'remember_token','city_id', 'code',
         'provider_type','provider_company_type','service_id', 'is_active','service_price',
         'bio','ads_category','is_top','commission','created_at','updated_at','account_maroof','account_freelancer',
-        'device_token','registration'
+        'device_token','registration','user_token','is_online'
     ];
 
 
